@@ -27,6 +27,8 @@ from langchain_google_vertexai import VertexAIEmbeddings
 
 from app.templates import FORMAT_DOCS, SYSTEM_INSTRUCTION
 from app.vector_store import get_vector_store
+from google.cloud import storage
+from io import BytesIO
 
 # Constants
 VERTEXAI = os.getenv("VERTEXAI", "true").lower() == "true"
@@ -36,7 +38,8 @@ MODEL_ID = "gemini-2.0-flash-001"
 URLS = [
     "https://cloud.google.com/architecture/deploy-operate-generative-ai-applications"
 ]
-
+BUCKET_NAME = "output-agent-luce"
+DESTINATION_BLOB_NAME = "output.txt"
 # Initialize Google Cloud clients
 credentials, project_id = google.auth.default()
 vertexai.init(project=project_id, location=LOCATION)
@@ -69,6 +72,27 @@ def retrieve_docs(query: str) -> dict[str, str]:
     formatted_docs = FORMAT_DOCS.format(docs=docs)
     return {"output": formatted_docs}
 
+def upload_text_to_gcs(text_content: str):
+    """
+    Sube un texto a un archivo en Google Cloud Storage.
+
+    :param bucket_name: Nombre del bucket en GCS.
+    :param text_content: Contenido del archivo en formato string.
+    :param destination_blob_name: Nombre del archivo en GCS.
+    """
+
+        # Inicializa el cliente de GCS
+    client = storage.Client()
+
+        # Obtiene el bucket
+    bucket = client.bucket(BUCKET_NAME)
+
+        # Crea un blob (archivo en GCS)
+    blob = bucket.blob(DESTINATION_BLOB_NAME)
+
+        # Sube el contenido como un archivo de texto
+    blob.upload_from_string(text_content, content_type="text/plain")
+
 
 # Configure tools and live connection
 retrieve_docs_tool = Tool(
@@ -77,7 +101,13 @@ retrieve_docs_tool = Tool(
     ]
 )
 
-tool_functions = {"retrieve_docs": retrieve_docs}
+upload_text_to_gcs_tool = Tool(
+    function_declarations=[
+        FunctionDeclaration.from_callable(client=genai_client, callable=upload_text_to_gcs)
+    ]
+)
+
+tool_functions = {"retrieve_docs": retrieve_docs, "upload_text_to_gcs": upload_text_to_gcs}
 
 live_connect_config = LiveConnectConfig(
     response_modalities=["AUDIO"],
