@@ -160,6 +160,7 @@ def get_connect_and_run_callable(websocket: WebSocket) -> Callable:
                 gemini_session.receive_from_client(),
                 gemini_session.receive_from_gemini(),
             )
+            logging.info("CONVERSATION ENDED")
 
     return connect_and_run
 
