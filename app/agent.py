@@ -28,7 +28,7 @@ from langchain_google_vertexai import VertexAIEmbeddings
 from app.templates import FORMAT_DOCS, SYSTEM_INSTRUCTION
 from app.vector_store import get_vector_store
 from google.cloud import storage
-from io import BytesIO
+from datetime import datetime
 
 # Constants
 VERTEXAI = os.getenv("VERTEXAI", "true").lower() == "true"
@@ -36,10 +36,11 @@ LOCATION = "us-central1"
 EMBEDDING_MODEL = "text-embedding-004"
 MODEL_ID = "gemini-2.0-flash-001"
 URLS = [
-    "https://cloud.google.com/architecture/deploy-operate-generative-ai-applications"
+    "https://storage.cloud.google.com/public-cvs-docs/Fake_Curriculum_John_Doe.pdf"
 ]
-BUCKET_NAME = "output-agent-luce"
-DESTINATION_BLOB_NAME = "output.txt"
+GCS_BUCKET_NAME = "output-agent-luce"  # Replace with your GCS bucket name
+SUMMARY_FOLDER = "conversation-summaries/"  # Folder in GCS where summaries are stored
+
 # Initialize Google Cloud clients
 credentials, project_id = google.auth.default()
 vertexai.init(project=project_id, location=LOCATION)
@@ -72,26 +73,30 @@ def retrieve_docs(query: str) -> dict[str, str]:
     formatted_docs = FORMAT_DOCS.format(docs=docs)
     return {"output": formatted_docs}
 
-def upload_text_to_gcs(text_content: str):
+
+def save_conversation_summary(summary: str) -> dict[str, str]:
     """
-    Sube un texto a un archivo en Google Cloud Storage.
+    Saves the conversation summary to a file in Google Cloud Storage.
 
-    :param bucket_name: Nombre del bucket en GCS.
-    :param text_content: Contenido del archivo en formato string.
-    :param destination_blob_name: Nombre del archivo en GCS.
+    Args:
+        summary: The conversation summary text.
+
+    Returns:
+        A dictionary containing the GCS file path.
     """
+    # Initialize GCS client
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(GCS_BUCKET_NAME)
 
-        # Inicializa el cliente de GCS
-    client = storage.Client()
+    # Generate a unique filename based on timestamp
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    file_name = f"{SUMMARY_FOLDER}conversation_summary_{timestamp}.txt"
 
-        # Obtiene el bucket
-    bucket = client.bucket(BUCKET_NAME)
+    # Upload summary to GCS
+    blob = bucket.blob(file_name)
+    blob.upload_from_string(summary, content_type="text/plain")
 
-        # Crea un blob (archivo en GCS)
-    blob = bucket.blob(DESTINATION_BLOB_NAME)
-
-        # Sube el contenido como un archivo de texto
-    blob.upload_from_string(text_content, content_type="text/plain")
+    return {"gcs_file_path": f"gs://{GCS_BUCKET_NAME}/{file_name}"}
 
 
 # Configure tools and live connection
@@ -101,16 +106,18 @@ retrieve_docs_tool = Tool(
     ]
 )
 
-upload_text_to_gcs_tool = Tool(
+save_conversation_summary_tool = Tool(
     function_declarations=[
-        FunctionDeclaration.from_callable(client=genai_client, callable=upload_text_to_gcs)
+        FunctionDeclaration.from_callable(
+            client=genai_client, callable=save_conversation_summary
+        )
     ]
 )
 
-tool_functions = {"retrieve_docs": retrieve_docs, "upload_text_to_gcs": upload_text_to_gcs}
+tool_functions = {"retrieve_docs": retrieve_docs, "save_conversation_summary": save_conversation_summary}
 
 live_connect_config = LiveConnectConfig(
     response_modalities=["AUDIO"],
-    tools=[retrieve_docs_tool],
+    tools=[retrieve_docs_tool, save_conversation_summary_tool],
     system_instruction=Content(parts=[{"text": SYSTEM_INSTRUCTION}]),
 )
