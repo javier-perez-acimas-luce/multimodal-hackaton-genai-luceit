@@ -114,7 +114,7 @@ save_conversation_summary_tool = Tool(
     ]
 )
 
-tool_functions = {"retrieve_docs": retrieve_docs, "save_conversation_summary": save_conversation_summary}
+tool_functions = {"save_conversation_summary": save_conversation_summary}
 
 live_connect_config = LiveConnectConfig(
     response_modalities=["AUDIO"],
