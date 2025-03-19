@@ -71,7 +71,7 @@ def retrieve_docs(query: str) -> dict[str, str]:
     """
 
     user_id = "test" # TODO: get from session
-    URLS = [ f"gs://{GCS_BUCKET_NAME}/cv_{user_id}.txt" ]
+    URLS = [ f"https://storage.googleapis.com/public-cv-docs/cv_{user_id}.txt" ]
     vector_store = get_vector_store(embedding=embedding, urls=URLS)
     retriever = vector_store.as_retriever()
     docs = retriever.invoke(query)
