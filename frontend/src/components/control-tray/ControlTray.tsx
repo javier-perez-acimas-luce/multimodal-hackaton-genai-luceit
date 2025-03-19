@@ -195,7 +195,6 @@ function ControlTray({
       <div className={cn("connection-container", { connected })}>
         <div className="connection-button-container">
           <button
-            ref={connectButtonRef}
             className={"action-button connect-toggle"}
             onClick={() => inputFileRef.current?.click()}
           >
