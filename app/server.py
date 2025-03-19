@@ -201,7 +201,7 @@ async def save_curriculum(curriculum_file: str) -> None:
         A dictionary containing the GCS file path.
     """
     GCS_BUCKET_NAME = "output-agent-luce"
-    user_id = "x"
+    user_id = "test" # TODO: get from session
     # Initialize GCS client
     storage_client = storage.Client()
     bucket = storage_client.bucket(GCS_BUCKET_NAME)

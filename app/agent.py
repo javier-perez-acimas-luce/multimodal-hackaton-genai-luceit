@@ -58,7 +58,7 @@ vector_store = get_vector_store(embedding=embedding, urls=URLS)
 retriever = vector_store.as_retriever()
 
 
-def retrieve_docs(query: str, user_id:str) -> dict[str, str]:
+def retrieve_docs(query: str) -> dict[str, str]:
     """
     Retrieves pre-formatted documents about MLOps (Machine Learning Operations),
       Gen AI lifecycle, and production deployment best practices.
@@ -69,6 +69,8 @@ def retrieve_docs(query: str, user_id:str) -> dict[str, str]:
     Returns:
         A set of relevant, pre-formatted documents.
     """
+
+    user_id = "test" # TODO: get from session
     URLS = [ f"gs://{GCS_BUCKET_NAME}/cv_{user_id}.txt" ]
     vector_store = get_vector_store(embedding=embedding, urls=URLS)
     retriever = vector_store.as_retriever()
@@ -77,7 +79,7 @@ def retrieve_docs(query: str, user_id:str) -> dict[str, str]:
     return {"output": formatted_docs}
 
 
-def save_conversation_summary(summary: str, user_id:str) -> dict[str, str]:
+def save_conversation_summary(summary: str) -> dict[str, str]:
     """
     Saves the conversation summary to a file in Google Cloud Storage.
 
@@ -87,6 +89,7 @@ def save_conversation_summary(summary: str, user_id:str) -> dict[str, str]:
     Returns:
         A dictionary containing the GCS file path.
     """
+    user_id = "test" # TODO: get from session
     # Initialize GCS client
     storage_client = storage.Client()
     bucket = storage_client.bucket(GCS_BUCKET_NAME)
