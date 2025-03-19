@@ -94,7 +94,7 @@ function ControlTray({
       },
     };
 
-    fetch(`/file-upload`, {
+    fetch(`${serverURL}/file-upload`, {
       method: "POST",
       body: formData,
       headers: config.headers,
