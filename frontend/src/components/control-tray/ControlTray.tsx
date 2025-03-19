@@ -94,6 +94,8 @@ function ControlTray({
       },
     };
 
+    console.log(`${serverURL}/file-upload`)
+
     fetch(`${serverURL}/file-upload`, {
       method: "POST",
       body: formData,
