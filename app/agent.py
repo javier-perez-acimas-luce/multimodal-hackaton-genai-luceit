@@ -58,7 +58,7 @@ vector_store = get_vector_store(embedding=embedding, urls=URLS)
 retriever = vector_store.as_retriever()
 
 
-def retrieve_docs(query: str) -> dict[str, str]:
+def retrieve_docs(query: str, user_id:str) -> dict[str, str]:
     """
     Retrieves pre-formatted documents about MLOps (Machine Learning Operations),
       Gen AI lifecycle, and production deployment best practices.
@@ -69,12 +69,15 @@ def retrieve_docs(query: str) -> dict[str, str]:
     Returns:
         A set of relevant, pre-formatted documents.
     """
+    URLS = [ f"gs://{GCS_BUCKET_NAME}/cv_{user_id}.txt" ]
+    vector_store = get_vector_store(embedding=embedding, urls=URLS)
+    retriever = vector_store.as_retriever()
     docs = retriever.invoke(query)
     formatted_docs = FORMAT_DOCS.format(docs=docs)
     return {"output": formatted_docs}
 
 
-def save_conversation_summary(summary: str) -> dict[str, str]:
+def save_conversation_summary(summary: str, user_id:str) -> dict[str, str]:
     """
     Saves the conversation summary to a file in Google Cloud Storage.
 
@@ -90,7 +93,7 @@ def save_conversation_summary(summary: str) -> dict[str, str]:
 
     # Generate a unique filename based on timestamp
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-    file_name = f"{SUMMARY_FOLDER}conversation_summary_{timestamp}.txt"
+    file_name = f"{SUMMARY_FOLDER}conversation_summary_{timestamp}_{user_id}.txt"
 
     # Upload summary to GCS
     blob = bucket.blob(file_name)

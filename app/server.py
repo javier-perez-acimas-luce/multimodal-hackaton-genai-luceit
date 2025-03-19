@@ -189,6 +189,29 @@ async def collect_feedback(feedback_dict: Feedback) -> None:
     feedback_data = feedback_dict.model_dump()
     logger.log_struct(feedback_data, severity="INFO")
 
+@app.post("/file-upload")
+async def save_curriculum(curriculum_file: str) -> None:
+    """
+    Saves the conversation summary to a file in Google Cloud Storage.
+
+    Args:
+        summary: The conversation summary text.
+
+    Returns:
+        A dictionary containing the GCS file path.
+    """
+    GCS_BUCKET_NAME = "output-agent-luce"
+    user_id = "x"
+    # Initialize GCS client
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(GCS_BUCKET_NAME)
+
+    # Upload summary to GCS
+    blob = bucket.blob(curriculum_file)
+    blob.upload_from_string(summary, content_type="text/plain")
+
+    return {"gcs_file_path": f"gs://{GCS_BUCKET_NAME}/cv_{user_id}.txt"}
+
 
 if __name__ == "__main__":
     import uvicorn
