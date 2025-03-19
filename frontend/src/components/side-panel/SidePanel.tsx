@@ -29,9 +29,10 @@ const filterOptions = [
   { value: "none", label: "All" },
 ];
 
-export default function SidePanel({ serverURL }: { serverURL: string }) {
+export default function SidePanel() {
   const { connected, client } = useLiveAPIContext();
   const [open, setOpen] = useState(true);
+  const [file, setFile] = useState<null | File>(null);
   const loggerRef = useRef<HTMLDivElement>(null);
   const loggerLastHeightRef = useRef<number>(-1);
   const { log, logs } = useLoggerStore();
@@ -42,31 +43,6 @@ export default function SidePanel({ serverURL }: { serverURL: string }) {
     label: string;
   } | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    if (event?.target?.files?.length) console.log(event.target.files[0]);
-
-    if (!event.target.files?.length) return;
-
-    const file = event.target.files[0];
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("fileName", file.name);
-    const config = {
-      headers: {
-        "content-type": "multipart/form-data",
-      },
-    };
-
-    fetch(`${serverURL}/file-upload`, {
-      method: "POST",
-      body: formData,
-      headers: config.headers,
-    }).then((response) => {
-      console.log(response);
-    });
-  }
 
   //scroll the log to the bottom when new logs come in
   useEffect(() => {
@@ -180,9 +156,6 @@ export default function SidePanel({ serverURL }: { serverURL: string }) {
             send
           </button>
         </div>
-      </div>
-      <div className="input-file-container">
-        <input type="file" id="file" name="file" onChange={handleChange} />
       </div>
     </div>
   );

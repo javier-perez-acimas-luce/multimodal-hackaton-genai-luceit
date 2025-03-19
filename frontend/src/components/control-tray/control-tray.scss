@@ -166,6 +166,15 @@
   }
 }
 
+.actions-nav-info {
+  position: absolute;
+  color: #ccc;
+  text-align: center;
+  top: -45px;
+  font-size: 14px;
+  max-width: 100%;
+}
+
 .actions-nav {
   background: var(--Neutral-5);
   border: 1px solid var(--Neutral-30);

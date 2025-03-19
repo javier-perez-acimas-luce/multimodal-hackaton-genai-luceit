@@ -37,24 +37,27 @@ function App() {
   const [sendFeedback, setShowFeedback] = useState(false);
 
   const submitFeedback = async () => {
-    const feedbackUrl = new URL('feedback', serverUrl.replace('ws', 'http')).href;
-    
+    const feedbackUrl = new URL("feedback", serverUrl.replace("ws", "http"))
+      .href;
+
     try {
       const response = await fetch(feedbackUrl, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           score: feedbackScore,
           text: feedbackText,
           run_id: runId,
           user_id: userId,
-          log_type: "feedback"
-        })
+          log_type: "feedback",
+        }),
       });
       if (!response.ok) {
-        throw new Error(`Failed to submit feedback: Server returned status ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Failed to submit feedback: Server returned status ${response.status} ${response.statusText}`
+        );
       }
 
       // Clear feedback after successful submission
@@ -63,7 +66,7 @@ function App() {
       setShowFeedback(false);
       alert("Feedback submitted successfully!");
     } catch (error) {
-      console.error('Error submitting feedback:', error);
+      console.error("Error submitting feedback:", error);
       alert(`Failed to submit feedback:  ${error}`);
     }
   };
@@ -72,7 +75,7 @@ function App() {
     <div className="App">
       <LiveAPIProvider url={serverUrl} userId={userId}>
         <div className="streaming-console">
-          <SidePanel serverURL={serverUrl} />
+          <SidePanel />
           <main>
             <div className="main-app-area">
               <video
@@ -88,75 +91,76 @@ function App() {
               videoRef={videoRef}
               supportsVideo={true}
               onVideoStreamChange={setVideoStream}
-            >
-            </ControlTray>
-            <div className="url-setup" style={{position: 'absolute', top: 0, left: 0, right: 0, pointerEvents: 'auto', zIndex: 1000, padding: '2px', marginBottom: '2px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255, 255, 255, 0.9)'}}>
-              <div>
-                <label htmlFor="server-url">Server URL:</label>
-                <input
-                  id="server-url"
-                  type="text"
-                  value={serverUrl}
-                  onChange={(e) => setServerUrl(e.target.value)}
-                  placeholder="Enter server URL"
-                  style={{
-                    cursor: 'text',
-                    padding: '4px',
-                    margin: '0 4px', 
-                    borderRadius: '2px',
-                    border: '1px solid #ccc',
-                    fontSize: '14px',
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                    width: '200px'
-                  }}
-                />
-                <label htmlFor="user-id">User ID:</label>
-                <input
-                  id="user-id"
-                  type="text"
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                  placeholder="Enter user ID"
-                  style={{
-                    cursor: 'text',
-                    padding: '4px',
-                    margin: '0 4px', 
-                    borderRadius: '2px',
-                    border: '1px solid #ccc',
-                    fontSize: '14px',
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                    width: '100px'
-                  }}
-                />
+              serverURL={serverUrl}
+            ></ControlTray>
+            <div className="url-setup">
+              <div className="url-setup-container">
+                <div>
+                  <label htmlFor="server-url">Server URL:</label>
+                  <input
+                    id="server-url"
+                    type="text"
+                    value={serverUrl}
+                    onChange={(e) => setServerUrl(e.target.value)}
+                    placeholder="Enter server URL"
+                    style={{
+                      cursor: "text",
+                      padding: "4px",
+                      margin: "0 4px",
+                      borderRadius: "2px",
+                      border: "1px solid #ccc",
+                      fontSize: "14px",
+                      width: "200px",
+                    }}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="user-id">User ID:</label>
+                  <input
+                    id="user-id"
+                    type="text"
+                    value={userId}
+                    onChange={(e) => setUserId(e.target.value)}
+                    placeholder="Enter user ID"
+                    style={{
+                      cursor: "text",
+                      padding: "4px",
+                      margin: "0 4px",
+                      borderRadius: "2px",
+                      border: "1px solid #ccc",
+                      fontSize: "14px",
+                      width: "100px",
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Feedback Button */}
-              <button 
+              <button
                 onClick={() => setShowFeedback(!sendFeedback)}
-                style={{
-                  padding: '5px 10px',
-                  margin: '10px',
-                  cursor: 'pointer'
-                }}
+                className="feedback-button"
               >
-                {sendFeedback ? 'Hide Feedback' : 'Send Feedback'}
+                {sendFeedback ? "Hide Feedback" : "Send Feedback"}
               </button>
             </div>
 
             {/* Feedback Overlay Section */}
             {sendFeedback && (
-              <div className="feedback-section" style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                padding: '20px',
-                background: 'rgba(255, 255, 255, 0.95)',
-                boxShadow: '0 0 10px rgba(0,0,0,0.2)',
-                borderRadius: '8px',
-                zIndex: 1001,
-                minWidth: '300px'
-              }}>
+              <div
+                className="feedback-section"
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  padding: "20px",
+                  background: "black",
+                  boxShadow: "0 0 10px rgba(0,0,0,0.2)",
+                  borderRadius: "8px",
+                  zIndex: 1001,
+                  minWidth: "300px",
+                }}
+              >
                 <h3>Provide Feedback</h3>
                 <div>
                   <label htmlFor="feedback-score">Score (0-10): </label>
@@ -167,28 +171,28 @@ function App() {
                     max="10"
                     value={feedbackScore}
                     onChange={(e) => setFeedbackScore(Number(e.target.value))}
-                    style={{margin: '0 10px'}}
+                    style={{ margin: "0 10px" }}
                   />
                 </div>
-                <div style={{marginTop: '10px'}}>
+                <div style={{ marginTop: "10px" }}>
                   <label htmlFor="feedback-text">Comments: </label>
                   <textarea
                     id="feedback-text"
                     value={feedbackText}
                     onChange={(e) => setFeedbackText(e.target.value)}
                     style={{
-                      width: '100%',
-                      height: '60px',
-                      margin: '5px 0'
+                      width: "100%",
+                      height: "60px",
+                      margin: "5px 0",
                     }}
                   />
                 </div>
                 <button
                   onClick={submitFeedback}
                   style={{
-                    padding: '5px 10px',
-                    marginTop: '5px',
-                    cursor: 'pointer'
+                    padding: "5px 10px",
+                    marginTop: "5px",
+                    cursor: "pointer",
                   }}
                 >
                   Submit Feedback

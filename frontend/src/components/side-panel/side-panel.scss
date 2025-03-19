@@ -63,6 +63,10 @@
 
   .hidden {
     display: none !important;
+
+    .input-file-container {
+      display: none !important;
+    }
   }
 
   &.open {
@@ -86,7 +90,6 @@
     h2 {
       position: relative;
       color: var(--Neutral-90, #e1e2e3);
-      font-family: "Google Sans";
       font-size: 21px;
       font-style: normal;
       font-weight: 500;
@@ -153,7 +156,6 @@
       gap: 6px;
       flex-shrink: 0;
       text-align: center;
-      font-family: "Space Mono";
       font-size: 14px;
       font-style: normal;
       font-weight: 400;
@@ -173,30 +175,6 @@
     overflow-x: hidden;
     overflow-y: auto;
     /*scrollbar-gutter: stable both-edges;*/
-  }
-
-  .input-file-container {
-    padding: 14px 25px;
-    input::file-selector-button {
-      background-image: linear-gradient(
-        to right,
-        #ff7a18,
-        #af002d,
-        #319197 100%,
-        #319197 200%
-      );
-      background-position-x: 0%;
-      background-size: 200%;
-      border: 0;
-      border-radius: 8px;
-      color: #fff;
-      padding: 1rem 1.25rem;
-      text-shadow: 0 1px 1px #333;
-      transition: all 0.25s;
-    }
-    input::file-selector-button:hover {
-      background-position-x: 100%;
-    }
   }
 
   .input-container {

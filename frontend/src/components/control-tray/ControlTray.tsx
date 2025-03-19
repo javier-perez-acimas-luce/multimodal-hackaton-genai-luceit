@@ -30,6 +30,7 @@ export type ControlTrayProps = {
   children?: ReactNode;
   supportsVideo: boolean;
   onVideoStreamChange?: (stream: MediaStream | null) => void;
+  serverURL: string;
 };
 
 type MediaStreamButtonProps = {
@@ -53,7 +54,7 @@ const MediaStreamButton = memo(
       <button className="action-button" onClick={start}>
         <span className="material-symbols-outlined">{offIcon}</span>
       </button>
-    ),
+    )
 );
 
 function ControlTray({
@@ -61,6 +62,7 @@ function ControlTray({
   children,
   onVideoStreamChange = () => {},
   supportsVideo,
+  serverURL,
 }: ControlTrayProps) {
   const videoStreams = [useWebcam(), useScreenCapture()];
   const [activeVideoStream, setActiveVideoStream] =
@@ -71,9 +73,35 @@ function ControlTray({
   const [muted, setMuted] = useState(false);
   const renderCanvasRef = useRef<HTMLCanvasElement>(null);
   const connectButtonRef = useRef<HTMLButtonElement>(null);
+  const inputFileRef = useRef<HTMLInputElement>(null);
 
   const { client, connected, connect, disconnect, volume } =
     useLiveAPIContext();
+
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    if (event?.target?.files?.length) console.log(event.target.files[0]);
+
+    if (!event.target.files?.length) return;
+
+    const file = event.target.files[0];
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("fileName", file.name);
+    const config = {
+      headers: {
+        "content-type": "multipart/form-data",
+      },
+    };
+
+    fetch(`/file-upload`, {
+      method: "POST",
+      body: formData,
+      headers: config.headers,
+    }).then((response) => {
+      console.log(response);
+    });
+  }
 
   useEffect(() => {
     if (!connected && connectButtonRef.current) {
@@ -83,7 +111,7 @@ function ControlTray({
   useEffect(() => {
     document.documentElement.style.setProperty(
       "--volume",
-      `${Math.max(5, Math.min(inVolume * 200, 8))}px`,
+      `${Math.max(5, Math.min(inVolume * 200, 8))}px`
     );
   }, [inVolume]);
 
@@ -158,43 +186,69 @@ function ControlTray({
 
   return (
     <section className="control-tray">
+      <span className="actions-nav-info">
+        Upload your resume and then click on play <br />
+        (don't forget to activate your microphone and camera)
+      </span>
       <canvas style={{ display: "none" }} ref={renderCanvasRef} />
-      <nav className={cn("actions-nav", { disabled: !connected })}>
-        <button
-          className={cn("action-button mic-button")}
-          onClick={() => setMuted(!muted)}
-        >
-          {!muted ? (
-            <span className="material-symbols-outlined filled">mic</span>
-          ) : (
-            <span className="material-symbols-outlined filled">mic_off</span>
-          )}
-        </button>
 
-        <div className="action-button no-action outlined">
-          <AudioPulse volume={volume} active={connected} hover={false} />
+      <div className={cn("connection-container", { connected })}>
+        <div className="connection-button-container">
+          <button
+            ref={connectButtonRef}
+            className={"action-button connect-toggle"}
+            onClick={() => inputFileRef.current?.click()}
+          >
+            <span className="material-symbols-outlined filled">
+              description
+            </span>
+          </button>
+          <input
+            style={{ display: "none" }}
+            ref={inputFileRef}
+            type="file"
+            onChange={handleChange}
+          />
         </div>
+      </div>
+      <div>
+        <nav className={cn("actions-nav", { disabled: !connected })}>
+          <button
+            className={cn("action-button mic-button")}
+            onClick={() => setMuted(!muted)}
+          >
+            {!muted ? (
+              <span className="material-symbols-outlined filled">mic</span>
+            ) : (
+              <span className="material-symbols-outlined filled">mic_off</span>
+            )}
+          </button>
 
-        {supportsVideo && (
-          <>
-            <MediaStreamButton
-              isStreaming={screenCapture.isStreaming}
-              start={changeStreams(screenCapture)}
-              stop={changeStreams()}
-              onIcon="cancel_presentation"
-              offIcon="present_to_all"
-            />
-            <MediaStreamButton
-              isStreaming={webcam.isStreaming}
-              start={changeStreams(webcam)}
-              stop={changeStreams()}
-              onIcon="videocam_off"
-              offIcon="videocam"
-            />
-          </>
-        )}
-        {children}
-      </nav>
+          <div className="action-button no-action outlined">
+            <AudioPulse volume={volume} active={connected} hover={false} />
+          </div>
+
+          {supportsVideo && (
+            <>
+              <MediaStreamButton
+                isStreaming={screenCapture.isStreaming}
+                start={changeStreams(screenCapture)}
+                stop={changeStreams()}
+                onIcon="cancel_presentation"
+                offIcon="present_to_all"
+              />
+              <MediaStreamButton
+                isStreaming={webcam.isStreaming}
+                start={changeStreams(webcam)}
+                stop={changeStreams()}
+                onIcon="videocam_off"
+                offIcon="videocam"
+              />
+            </>
+          )}
+          {children}
+        </nav>
+      </div>
 
       <div className={cn("connection-container", { connected })}>
         <div className="connection-button-container">
