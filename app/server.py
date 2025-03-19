@@ -192,7 +192,7 @@ async def collect_feedback(feedback_dict: Feedback) -> None:
 @app.post("/file-upload")
 async def save_curriculum(file: UploadFile = File(...)):
     """
-    Saves the uploaded file to Google Cloud Storage.
+    Saves the uploaded resume to Google Cloud Storage.
 
     Args:
         file: The uploaded file.
