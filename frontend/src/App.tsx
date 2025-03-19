@@ -72,7 +72,7 @@ function App() {
     <div className="App">
       <LiveAPIProvider url={serverUrl} userId={userId}>
         <div className="streaming-console">
-          <SidePanel />
+          <SidePanel serverURL={serverUrl} />
           <main>
             <div className="main-app-area">
               <video

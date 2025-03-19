@@ -29,7 +29,7 @@ const filterOptions = [
   { value: "none", label: "All" },
 ];
 
-export default function SidePanel() {
+export default function SidePanel({ serverURL }: { serverURL: string }) {
   const { connected, client } = useLiveAPIContext();
   const [open, setOpen] = useState(true);
   const loggerRef = useRef<HTMLDivElement>(null);
@@ -42,6 +42,31 @@ export default function SidePanel() {
     label: string;
   } | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    if (event?.target?.files?.length) console.log(event.target.files[0]);
+
+    if (!event.target.files?.length) return;
+
+    const file = event.target.files[0];
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("fileName", file.name);
+    const config = {
+      headers: {
+        "content-type": "multipart/form-data",
+      },
+    };
+
+    fetch(`${serverURL}/file-upload`, {
+      method: "POST",
+      body: formData,
+      headers: config.headers,
+    }).then((response) => {
+      console.log(response);
+    });
+  }
 
   //scroll the log to the bottom when new logs come in
   useEffect(() => {
@@ -104,8 +129,8 @@ export default function SidePanel() {
               backgroundColor: isFocused
                 ? "var(--Neutral-30)"
                 : isSelected
-                  ? "var(--Neutral-20)"
-                  : undefined,
+                ? "var(--Neutral-20)"
+                : undefined,
             }),
           }}
           defaultValue={selectedOption}
@@ -155,6 +180,9 @@ export default function SidePanel() {
             send
           </button>
         </div>
+      </div>
+      <div className="input-file-container">
+        <input type="file" id="file" name="file" onChange={handleChange} />
       </div>
     </div>
   );

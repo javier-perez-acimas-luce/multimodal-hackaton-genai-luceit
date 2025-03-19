@@ -95,10 +95,7 @@
       opacity: 0;
       display: none;
       left: -100%;
-      transition:
-        opacity 0.2s ease-in,
-        left 0.2s ease-in,
-        display 0.2s ease-in;
+      transition: opacity 0.2s ease-in, left 0.2s ease-in, display 0.2s ease-in;
       transition-behavior: allow-discrete;
 
       @starting-style {
@@ -176,6 +173,30 @@
     overflow-x: hidden;
     overflow-y: auto;
     /*scrollbar-gutter: stable both-edges;*/
+  }
+
+  .input-file-container {
+    padding: 14px 25px;
+    input::file-selector-button {
+      background-image: linear-gradient(
+        to right,
+        #ff7a18,
+        #af002d,
+        #319197 100%,
+        #319197 200%
+      );
+      background-position-x: 0%;
+      background-size: 200%;
+      border: 0;
+      border-radius: 8px;
+      color: #fff;
+      padding: 1rem 1.25rem;
+      text-shadow: 0 1px 1px #333;
+      transition: all 0.25s;
+    }
+    input::file-selector-button:hover {
+      background-position-x: 100%;
+    }
   }
 
   .input-container {
