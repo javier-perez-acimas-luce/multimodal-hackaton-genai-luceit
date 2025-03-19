@@ -19,7 +19,7 @@ from collections.abc import Callable
 from typing import Any, Literal
 
 import backoff
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from google.cloud import logging as google_cloud_logging
 from google.genai import types
@@ -190,27 +190,29 @@ async def collect_feedback(feedback_dict: Feedback) -> None:
     logger.log_struct(feedback_data, severity="INFO")
 
 @app.post("/file-upload")
-async def save_curriculum(curriculum_file: str) -> None:
+async def save_curriculum(file: UploadFile = File(...)):
     """
-    Saves the conversation summary to a file in Google Cloud Storage.
+    Saves the uploaded file to Google Cloud Storage.
 
     Args:
-        summary: The conversation summary text.
+        file: The uploaded file.
 
     Returns:
         A dictionary containing the GCS file path.
     """
     GCS_BUCKET_NAME = "output-agent-luce"
-    user_id = "test" # TODO: get from session
-    # Initialize GCS client
+    user_id = "test"  # TODO: get from session
+
     storage_client = storage.Client()
     bucket = storage_client.bucket(GCS_BUCKET_NAME)
+    
+    file_name = f"curriculums/cv_{user_id}.txt"
+    blob = bucket.blob(file_name)
+    
+    file_content = await file.read()
+    blob.upload_from_string(file_content, content_type=file.content_type)
 
-    # Upload summary to GCS
-    blob = bucket.blob(curriculum_file)
-    blob.upload_from_string(summary, content_type="text/plain")
-
-    return {"gcs_file_path": f"gs://{GCS_BUCKET_NAME}/cv_{user_id}.txt"}
+    return {"gcs_file_path": f"gs://{GCS_BUCKET_NAME}/{file_name}"}
 
 
 if __name__ == "__main__":
