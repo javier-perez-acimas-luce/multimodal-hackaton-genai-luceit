@@ -210,7 +210,7 @@ async def save_curriculum(file: UploadFile = File(...)):
     blob = bucket.blob(file_name)
     
     file_content = await file.read()
-    blob.upload_from_string(file_content, content_type=file.content_type)
+    blob.upload_from_string(file_content, content_type="text/plain")
 
     return {"gcs_file_path": f"gs://{GCS_BUCKET_NAME}/{file_name}"}
 
